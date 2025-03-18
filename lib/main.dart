@@ -1,12 +1,19 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart' as firebase;
 import 'package:flutter/material.dart';
-import 'package:the_heritedge/Screens/login_page.dart';
+import 'package:provider/provider.dart';
+import 'package:the_heritedge/Common/Screens/splash_screen.dart';
+import 'package:the_heritedge/Theme/dark_theme.dart';
+import 'package:the_heritedge/providers/theme_provider.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,8 +22,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
-      home: LoginScreen(),
+      debugShowCheckedModeBanner: false,
+      title: "HeritEdge",
+      theme: AppThemes.lightTheme,
+      darkTheme: AppThemes.darkTheme,
+      themeMode: themeProvider.themeMode, // Uses provider's theme
+      home: SplashScreen(),
     );
   }
 }

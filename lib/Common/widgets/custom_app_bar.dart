@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:the_heritedge/providers/theme_provider.dart';
 import 'package:the_heritedge/services/auth_service.dart';
-import 'package:the_heritedge/Screens//login_page.dart';
 
 
 
@@ -23,12 +22,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       title: Row(
         children: [
-          ClipOval(
-            child: Image.asset("assets/images/app_logo.jpg",
-            height: kToolbarHeight * 1.0,
-              width:kToolbarHeight *1.0,
-              fit: BoxFit.cover,
-            ),
+          Text("Herit",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+          ),
+          Text("Edge",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
           ),
         ],
       ),

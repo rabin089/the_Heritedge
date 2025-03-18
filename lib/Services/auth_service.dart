@@ -12,6 +12,7 @@ class AuthService{
     catch(e){
       print("sign up error:$e");
     }
+    return null;
   }
   // Sign In
   Future<User?> signIn(String email, String password) async {
@@ -35,4 +36,12 @@ class AuthService{
 User? getCurrentUser(){
     return auth.currentUser;
 }
+ Future<String?> sendPasswordResetEmail(String email) async {
+    try {
+      await auth.sendPasswordResetEmail(email: email);
+      return null; // success
+    } catch (e) {
+      return e.toString(); // return error message
+    }
+  }
 }

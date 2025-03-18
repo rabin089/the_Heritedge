@@ -2,15 +2,18 @@ import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:the_heritedge/Screens/home_page.dart';
-import 'package:the_heritedge/Screens/signup_page.dart';
+import 'package:the_heritedge/Common/Screens/forget.password.dart';
+import 'package:the_heritedge/Common/Screens/home_page.dart';
+import 'package:the_heritedge/Common/Screens/signup_page.dart';
 import 'package:the_heritedge/Services/auth_service.dart';
-
+import 'package:the_heritedge/Common/sizedBox/sized.box.widget.dart';
 
 
 
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
 
 
   @override
@@ -47,7 +50,7 @@ class LoginScreenState extends State<LoginScreen> {
             fit: BoxFit.cover,
           ),
           BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 25),
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           ),
           Center(
             child: Container(
@@ -108,8 +111,21 @@ class LoginScreenState extends State<LoginScreen> {
                                 border: OutlineInputBorder(),
                               ),
                             ),
-                            SizedBox(height: 20,),
-                            ElevatedButton(onPressed: login, child: Text("login",style: TextStyle(color: Colors.black),)),
+                            sboxH20,
+                            ElevatedButton(
+                                onPressed: login,
+                                child: Text("login",
+                                  style: TextStyle(color: Colors.black),
+                                )),
+                            sboxH20,
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                    context, MaterialPageRoute(
+                                    builder: (context) => ForgotPasswordScreen()));
+                              },
+                              child: Text("Forgot Password?", style: TextStyle(color: Colors.black)),
+                            ),
                             TextButton(onPressed: () {
                               Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
                             },

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:the_heritedge/Screens/login_page.dart';
-import 'package:the_heritedge/widgets/custom_text.widget.dart';
+import 'package:the_heritedge/Common/Screens/login_page.dart';
+import 'package:the_heritedge/Common/widgets/custom_text.widget.dart';
 
 class AppDrawer extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -14,29 +14,47 @@ class AppDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.redAccent,
+          Container(
+            height: 100, // Custom height here
+            width: double.infinity,
+            color: Colors.brown,
+            padding: EdgeInsets.only(top: 40, right: 16), // Adjust top padding as needed
+            child: Row(
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text("HeritEdge",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
 
-            ),
-            child: Align(
-              alignment: Alignment.topRight,
-              child: IconButton(
-                icon: Icon(Icons.close, color: Colors.white),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
+                  ),
+                  ),
+                ),
+                Spacer(),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.white),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
           ListTile(
-            title: CustomTextWidget(text: "Home", color: Colors.red),
+            leading: Icon(Icons.home),
+            title: CustomTextWidget(text: "Home"),
             onTap: (){
-    }),
+              }),
 
       ListTile(
         leading: Icon(Icons.person),
          title: Text("Profile"),
+        onTap: (){},
        ),
     ListTile(
     leading: Icon(Icons.bookmark),
