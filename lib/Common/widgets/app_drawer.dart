@@ -5,6 +5,7 @@ import 'package:the_heritedge/Admin/Screens/admin.dashboard.screen.dart';
 import 'package:the_heritedge/User/login_sign_up/provider/auth.provider.dart';
 import 'package:the_heritedge/User/login_sign_up/screens/login_page.dart';
 import 'package:the_heritedge/Common/widgets/custom_text.widget.dart';
+import 'package:the_heritedge/User/ui/screens/contribution.screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final User? user = FirebaseAuth.instance.currentUser;
@@ -67,7 +68,12 @@ class AppDrawer extends StatelessWidget {
     ListTile(
     leading: Icon(Icons.edit),
     title: Text("Contributions"),
-    onTap: (){},
+    onTap: (){
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder:(context) =>ContributionScreen()),
+      );
+    },
     ),
     ListTile(
     leading: Icon(Icons.explore),
