@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:the_heritedge/Common/sizedBox/sized.box.widget.dart';
-import 'package:the_heritedge/Services/auth_service.dart';
+import 'package:the_heritedge/User/login_sign_up/repository/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});

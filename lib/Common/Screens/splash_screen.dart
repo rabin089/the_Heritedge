@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:the_heritedge/Common/Screens/home_page.dart';
-import 'package:the_heritedge/Common/Screens/login_page.dart';
+import 'package:the_heritedge/User/login_sign_up/screens/login_page.dart';
 
 
 

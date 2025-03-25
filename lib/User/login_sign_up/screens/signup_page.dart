@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:the_heritedge/Common/Screens/login_page.dart';
-import 'package:the_heritedge/Services/auth_service.dart';
+import 'package:the_heritedge/User/login_sign_up/screens/login_page.dart';
+import 'package:the_heritedge/User/login_sign_up/repository/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -34,11 +34,12 @@ class _SignUpScreenState extends State<SignupScreen> {
       var user = await _authService.signUp(email, password);
       if (user != null) {
         // Store additional user info in Firestore
-        await _firestore.collection('users').doc(user.uid).set({
+        await _firestore.collection('roles_for_users').doc(user.uid).set({
           'email': email,
           'username': username,
           'mobile': mobile,
           'createdAt': Timestamp.now(),
+          'role': 'user'
         });
 
         ScaffoldMessenger.of(context).showSnackBar(

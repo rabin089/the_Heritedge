@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:the_heritedge/Common/Screens/heritage_detail_screen.dart';
 import 'package:the_heritedge/Common/widgets/app_drawer.dart';
 import 'package:the_heritedge/Common/widgets/custom_app_bar.dart';
-import 'package:the_heritedge/Models/api_for_homepage.dart';
+import 'package:the_heritedge/User/ui/repository/api_for_homepage.dart';
+import 'package:the_heritedge/User/login_sign_up/repository/auth_service.dart';
 
-import 'package:the_heritedge/services/auth_service.dart';
 
 
 class HomeScreen extends StatefulWidget {

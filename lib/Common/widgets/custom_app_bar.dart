@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:the_heritedge/providers/theme_provider.dart';
-import 'package:the_heritedge/services/auth_service.dart';
-
-
+import 'package:the_heritedge/User/login_sign_up/repository/auth_service.dart';
+import '../providers/theme_provider.dart';
 
 
 

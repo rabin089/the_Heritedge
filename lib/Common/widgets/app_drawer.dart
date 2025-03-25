@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:the_heritedge/Common/Screens/login_page.dart';
+import 'package:provider/provider.dart';
+import 'package:the_heritedge/Admin/Screens/admin.dashboard.screen.dart';
+import 'package:the_heritedge/User/login_sign_up/provider/auth.provider.dart';
+import 'package:the_heritedge/User/login_sign_up/screens/login_page.dart';
 import 'package:the_heritedge/Common/widgets/custom_text.widget.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -75,6 +78,24 @@ class AppDrawer extends StatelessWidget {
     leading: Icon(Icons.settings),
     title: Text("Settings"),
     onTap: () {},
+    ),
+    ListTile(
+      leading: Icon(Icons.dashboard),
+    title: Text("Admint Dashboard"),
+    onTap: (){
+      final role = Provider.of<AuthLoginProvider>(context, listen: false).role;
+      if (role == 'admin') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AdminDashboard()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("You are not authorized to access this page.")),
+        );
+        Navigator.pop(context);
+      }
+    },
     ),
     Divider(),
     ListTile(
