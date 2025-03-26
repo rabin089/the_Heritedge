@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+// import 'package:googleapis/connectors/v1.dart';
+import 'package:provider/provider.dart';
+import '../../User/login_sign_up/provider/auth.provider.dart';
 
 class AdminDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return  WillPopScope(
+        onWillPop: () async {
+      Provider.of<AuthLoginProvider>(context, listen: false).role; // Refresh role
+      return true;
+    },
+    child: Scaffold(
       appBar: AppBar(
         title: Text("Admin Dashboard"),
         leading: IconButton(onPressed:(){
@@ -56,6 +64,7 @@ class AdminDashboard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
