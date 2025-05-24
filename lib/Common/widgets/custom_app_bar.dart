@@ -9,7 +9,7 @@ import '../providers/theme_provider.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final AuthService _authService = AuthService();
   final VoidCallback onMenuTap;
-  CustomAppBar({Key? Key,required this.onMenuTap});
+  CustomAppBar({super.key, Key? Key,required this.onMenuTap});
 
   @override
   Widget build(BuildContext context) {

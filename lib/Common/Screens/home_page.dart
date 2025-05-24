@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:the_heritedge/Common/Screens/heritage_detail_screen.dart';
+import 'package:the_heritedge/Common/sizedBox/sized.box.widget.dart';
 import 'package:the_heritedge/Common/widgets/app_drawer.dart';
 import 'package:the_heritedge/Common/widgets/custom_app_bar.dart';
+import 'package:the_heritedge/Common/widgets/suggestion.header.widget.dart';
 import 'package:the_heritedge/User/ui/repository/api_for_homepage.dart';
 import 'package:the_heritedge/User/login_sign_up/repository/auth_service.dart';
+
+import '../widgets/filter.section.widget.dart';
+import '../widgets/search._bar.widget.dart';
 
 
 
@@ -39,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         children: [
           const Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(14.0),
             child: Text(
               "Explore Nepal's Cultural Heritage",
               style: TextStyle(
@@ -48,6 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
               fontWeight: FontWeight.bold),
             ),
           ),
+          sboxH3,
+          SearchBarWidget(onSearchChanged: (String value) {  },),
+          sboxH3,
+          SuggestionHeaderWidget(title: "Explore Near You"),
+          FilterSectionWidget(),
           Expanded(
             child: FutureBuilder(
               future: _heritageSitesFuture,

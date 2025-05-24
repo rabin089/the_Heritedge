@@ -5,7 +5,7 @@ class HeritageDetailScreen extends StatelessWidget {
   final Map<String, dynamic> site;
   final String? id;
 
-  HeritageDetailScreen({required this.site, this.id});
+  const HeritageDetailScreen({super.key, required this.site, this.id});
 
   void _openGoogleMaps(Map<String, dynamic> site) async {
     final String latitude = site["latitude"]?.toString() ?? "0.0";

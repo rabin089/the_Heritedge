@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:the_heritedge/User/login_sign_up/provider/auth.provider.dart';
@@ -28,14 +27,14 @@ class LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordControl= TextEditingController();
   final AuthService authService= AuthService();
   final keyForm = GlobalKey<FormState>();
-
+bool _obscurePassword = true;
   void login() async {
     String email = emailControl.text.trim();
     String password = passwordControl.text.trim();
 
     var user = await authService.signIn(email, password);
     if (user != null) {
-      // 🔥 Fetch role from Firestore
+
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('roles_for_users')
           .doc(user.uid)
@@ -68,109 +67,138 @@ class LoginScreenState extends State<LoginScreen> {
 
   @override
    Widget build(BuildContext context) {
-     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.network(
-            'https://www.discoveraltitude.com/uploads/media/world-heritage-sites-in-nepal/bouddhanath-stupa.jpg',
-            fit: BoxFit.cover,
-          ),
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          ),
-          Center(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16.0),
-
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 80),
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Herit',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'Edge',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.brown,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Login",
+              const SizedBox(height: 40),
+
+              // Email Field
+              TextFormField(
+                controller: emailControl,
+                decoration: InputDecoration(
+                  hintText: 'Email',
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.black26),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Password Field
+              TextFormField(
+                controller: passwordControl,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  hintText: 'Password',
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.black26),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                ),
+              ),
+
+              // Forgot Password
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordScreen()));
+                  },
+                  child: Text(
+                    'Forgot Password?',
                     style: TextStyle(
-                      fontSize: 32,
+                      color: Colors.deepPurple,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Login Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: login,
+                  icon: Icon(Icons.arrow_forward, color: Colors.white),
+                  label: Text(
+                    'Login',
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 20,),
-                  Card(
-                    color: Colors.white30,
-                    elevation: 8.0,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: keyForm,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextFormField(
-                              controller: emailControl,
-                              decoration: InputDecoration(
-                                labelText: "Email Address",
-                                labelStyle: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 16
-                                ),  
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(10),
-                                  gapPadding: 10,
-                                  
-                                ),
-                                iconColor: Colors.black,
-                              ),
-                            ),
-                            SizedBox(height: 20,),
-                            TextFormField(
-                              controller: passwordControl,
-                              decoration: InputDecoration(
-                                labelText: "Password",
-                                labelStyle: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 16
-                                ),
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                            sboxH20,
-                            ElevatedButton(
-                                onPressed: login,
-                                child: Text("login",
-                                  style: TextStyle(color: Colors.black),
-                                )),
-                            sboxH20,
-                            TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context, MaterialPageRoute(
-                                    builder: (context) => ForgotPasswordScreen()));
-                              },
-                              child: Text("Forgot Password?", style: TextStyle(color: Colors.black)),
-                            ),
-                            TextButton(onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
-                            },
-                            child: Text("Don't have an account? Sign Up", style: TextStyle(color: Colors.black),)
-                              
-
-                            )
-
-                          ],
-                        ),
-                      ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.lightBlueAccent,
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+
+              const SizedBox(height: 16),
+
+              // Sign Up Text
+              TextButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
+                },
+                child: Text(
+                  'Sign up',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

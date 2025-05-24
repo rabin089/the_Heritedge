@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:the_heritedge/User/ui/provider/contribution.provider.dart';
 
 class ContributionScreen extends StatefulWidget {
+  const ContributionScreen({super.key});
+
   @override
   _ContributionScreenState createState() => _ContributionScreenState();
 }

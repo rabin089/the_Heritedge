@@ -1,70 +1,79 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-// import 'package:googleapis/connectors/v1.dart';
-import 'package:provider/provider.dart';
-import '../../User/login_sign_up/provider/auth.provider.dart';
 
-class AdminDashboard extends StatelessWidget {
+class AdminDashboardScreen extends StatelessWidget {
+  const AdminDashboardScreen({super.key});
+
+  void approveContribution(String docId) {
+    FirebaseFirestore.instance
+        .collection('contributions')
+        .doc(docId)
+        .update({'isPending': false});
+  }
+
+  void deleteContribution(String docId) {
+    FirebaseFirestore.instance.collection('contributions').doc(docId).delete();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return  WillPopScope(
-        onWillPop: () async {
-      Provider.of<AuthLoginProvider>(context, listen: false).role; // Refresh role
-      return true;
-    },
-    child: Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: Text("Admin Dashboard"),
-        leading: IconButton(onPressed:(){
-          Navigator.pop(context);
-        } , icon: Icon(Icons.arrow_back_outlined))
+        title: const Text("Admin Dashboard"),
+        backgroundColor: Colors.brown,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Welcome to the Admin Dashboard!",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Card(
-              elevation: 4,
-              child: ListTile(
-                title: Text("Manage Users"),
-                subtitle: Text("View and assign roles to users."),
-                onTap: () {
-                  // Navigate to User Management
-                },
-              ),
-            ),
-            SizedBox(height: 10),
-            Card(
-              elevation: 4,
-              child: ListTile(
-                title: Text("Manage Heritage Sites"),
-                subtitle: Text("Approve or reject heritage site submissions."),
-                onTap: () {
-                  // Navigate to Heritage Site Management
-                },
-              ),
-            ),
-            SizedBox(height: 10),
-            Card(
-              elevation: 4,
-              child: ListTile(
-                title: Text("App Analytics"),
-                subtitle: Text("View app usage and reports."),
-                onTap: () {
-                  // Navigate to Analytics
-                },
-              ),
-            ),
-            // Add more sections here as needed
-          ],
-        ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('heritage_sites').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text("No contributions yet."));
+          }
+
+          final contributions = snapshot.data!.docs;
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(10),
+            itemCount: contributions.length,
+            itemBuilder: (context, index) {
+              final doc = contributions[index];
+              final data = doc.data() as Map<String, dynamic>;
+              final bool isPending = data['isPending'] ?? true;
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 3,
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.brown[100],
+                    child: Text(data['name']?[0] ?? '?', style: const TextStyle(color: Colors.brown)),
+                  ),
+                  title: Text(data['name'] ?? 'Unnamed'),
+                  subtitle: Text(data['location'] ?? 'Unknown location'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isPending)
+                        IconButton(
+                          icon: const Icon(Icons.check_circle, color: Colors.green),
+                          onPressed: () => approveContribution(doc.id),
+                        ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => deleteContribution(doc.id),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
-    ),
     );
   }
 }

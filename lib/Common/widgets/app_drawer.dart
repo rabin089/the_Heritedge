@@ -93,7 +93,7 @@ class AppDrawer extends StatelessWidget {
       if (role == 'admin') {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AdminDashboard()),
+          MaterialPageRoute(builder: (context) => AdminDashboardScreen()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,15 +104,18 @@ class AppDrawer extends StatelessWidget {
     },
     ),
     Divider(),
-    ListTile(
-    leading: Icon(Icons.logout, color: Colors.red),
-    title: Text("Logout", style: TextStyle(color: Colors.red)),
-    onTap: () async{
-      await FirebaseAuth.instance.signOut();
-      print("Logged out user: $user");
-    Navigator.pushReplacement(
-    context, MaterialPageRoute(builder: (context) => LoginScreen()));
-    },
+    Align(
+      alignment: Alignment.bottomCenter,
+      child: ListTile(
+      leading: Icon(Icons.logout, color: Colors.red),
+      title: Text("Logout", style: TextStyle(color: Colors.red)),
+      onTap: () async{
+        await FirebaseAuth.instance.signOut();
+        print("Logged out user: $user");
+      Navigator.pushReplacement(
+      context, MaterialPageRoute(builder: (context) => LoginScreen()));
+      },
+      ),
     ),
         ],
       ),

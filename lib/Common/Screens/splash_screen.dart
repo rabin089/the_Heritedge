@@ -8,6 +8,8 @@ import 'package:the_heritedge/User/login_sign_up/screens/login_page.dart';
 
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
 
 
   @override
