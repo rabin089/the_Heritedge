@@ -7,27 +7,31 @@ class AuthService {
 
   Future<User?> signUp(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       User? user = userCredential.user;
 
       if (user != null) {
-        await _firestoreService.saveUserData(user, 'user'); // Default role: user
+        await _firestoreService.saveUserData(
+          user,
+          'user',
+        ); // Default role: user
       }
 
       return user;
     } catch (e) {
       print("Sign-up error: $e");
-      return null;
+      throw e.toString();
     }
   }
 
   Future<User?> signIn(String email, String password) async {
     try {
-      Map<String, dynamic>? result = await _firestoreService.signInAndFetchRole(email, password);
+      Map<String, dynamic>? result = await _firestoreService.signInAndFetchRole(
+        email,
+        password,
+      );
       if (result != null && result['user'] is User) {
         return result['user'] as User?;
       }
@@ -42,12 +46,11 @@ class AuthService {
     await _auth.signOut();
   }
 
-
-User? getCurrentUser(){
+  User? getCurrentUser() {
     return _auth.currentUser;
-}
+  }
 
- Future<String?> sendPasswordResetEmail(String email) async {
+  Future<String?> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
       return null; // success

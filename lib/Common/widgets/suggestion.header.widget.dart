@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:the_heritedge/Common/Screens/heritage.list.page.dart';
+import 'package:the_heritedge/Common/widgets/filter.section.widget.dart';
 
 class SuggestionHeaderWidget extends StatelessWidget {
   final String title;
@@ -30,12 +31,15 @@ class SuggestionHeaderWidget extends StatelessWidget {
                   )
               ),
               ),
-              IconButton(
-                  icon: const Icon(Icons.filter_list), 
-                  onPressed: () {
-
-                  }
-              )
+              // IconButton(
+              //     icon: const Icon(Icons.filter_list),
+              //     onPressed: () {
+              //       showDialog(
+              //         context: context,
+              //         builder: (context) => FilterSectionWidget(),
+              //       );
+              //     }
+              // )
             ],
           )
         ],

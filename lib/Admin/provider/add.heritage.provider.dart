@@ -1,17 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/imgbb.services.dart';
+import '../../User/ui/services/imgbb.services.dart'; // Adjust path as needed
 
-class ContributionProvider with ChangeNotifier {
+class AdminHeritageProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ImgBBService _imgBBService = ImgBBService();
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  Future<void> submitContribution({
-    required String userId,
+  Future<void> addHeritageByAdmin({
     required String siteName,
     required String description,
     required String category,
@@ -27,8 +26,10 @@ class ContributionProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      // Upload primary image
       String? primaryImageUrl = await _imgBBService.uploadImage(primaryImage);
 
+      // Upload secondary images
       List<String> secondaryImageUrls = [];
       for (var image in secondaryImages) {
         String? imageUrl = await _imgBBService.uploadImage(image);
@@ -38,8 +39,8 @@ class ContributionProvider with ChangeNotifier {
       }
 
       if (primaryImageUrl != null) {
+        // Add document to Firestore
         await _firestore.collection('heritage_sites').add({
-          'userId': userId,  // Add user ID here
           'name': siteName,
           'description': description,
           'category': category,
@@ -50,16 +51,17 @@ class ContributionProvider with ChangeNotifier {
           'tags': tags,
           'imageUrl': primaryImageUrl,
           'secondaryImages': secondaryImageUrls,
-          'isPending': true,
+          'isPending': false, // ✅ Admin always sets isPending to false
           'timestamp': FieldValue.serverTimestamp(),
         });
 
-        print("Contribution saved successfully!");
+        print("Admin heritage site submission successful.");
       } else {
-        print("Failed to upload primary image.");
+        throw Exception("Primary image upload failed.");
       }
     } catch (e) {
-      print("Error saving contribution: $e");
+      print("Admin submission error: $e");
+      rethrow;
     }
 
     _isLoading = false;

@@ -1,0 +1,23 @@
+name: heritage_flutter_app
+description: A Flutter application to fetch and display heritage sites from Firestore.
+
+publish_to: 'none'
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cloud_firestore: ^3.1.5
+  firebase_core: ^1.10.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/

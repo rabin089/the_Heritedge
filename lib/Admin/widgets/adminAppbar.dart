@@ -1,17 +1,49 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:googleapis/connectors/v1.dart';
+import 'package:the_heritedge/Common/widgets/search._bar.widget.dart';
 
-class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const AdminAppBar({super.key});
+import '../../User/login_sign_up/repository/auth_service.dart';
+class AdminCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final VoidCallback onMenuTap;
+
+  AdminCustomAppBar({
+    super.key,
+    required this.onMenuTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+
     return AppBar(
-      title: const Text('HeritEdge Admin Dashboard'),
+      backgroundColor: Color(0xFF795548),
+      automaticallyImplyLeading: false,
+      title: Row(
+        children: [
+          Text(
+            "Herit",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            "Edge",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.logout),
+          icon: Icon(Icons.menu),
+          color: Colors.white,
           onPressed: () {
-            /* Implement logout */
+            Scaffold.of(context).openDrawer();
           },
         ),
       ],

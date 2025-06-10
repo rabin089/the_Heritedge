@@ -1,8 +1,13 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:the_heritedge/User/ui/provider/contribution.provider.dart';
+
+import '../model/predictor.model.dart';
+import '../services/place.services.dart';
 
 class ContributionScreen extends StatefulWidget {
   const ContributionScreen({super.key});
@@ -14,16 +19,53 @@ class ContributionScreen extends StatefulWidget {
 class _ContributionScreenState extends State<ContributionScreen> {
   final TextEditingController _siteNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _latitudeController = TextEditingController();
-  final TextEditingController _longitudeController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _tagsController = TextEditingController();
+  List<PlacePrediction> suggestions = [];
 
   File? _primaryImage;
   List<File> _secondaryImages = [];
 
+  String? _selectedCategory;
+  String? _selectedRegion;
+
   final ImagePicker _picker = ImagePicker();
 
+  final List<String> _categories = [
+    'Temple',
+    'Monument',
+    'Palace',
+    'Fort',
+    'Museum',
+    'Archaeological Site',
+    'Religious Site',
+    'Cultural Heritage',
+    'Natural Heritage',
+    'Other'
+  ];
+
+  final List<String> _regions = [
+    'Bagmati',
+    'Gandaki',
+    'Lumbini',
+    'Karnali',
+    'Sudurpashchim',
+    'Koshi',
+    'Madhesh'
+  ];
+
+  void getSuggestions(String input) async {
+    final service = PlaceService();
+    final results = await service.fetchPlaceSuggestions(input);
+    setState(() {
+      suggestions = results;
+    });
+  }
   Future<void> _pickPrimaryImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
     if (pickedFile != null) {
       setState(() {
         _primaryImage = File(pickedFile.path);
@@ -40,120 +82,457 @@ class _ContributionScreenState extends State<ContributionScreen> {
     }
   }
 
-  void _submitContribution(BuildContext context) {
-    // if (_siteNameController.text.isEmpty ||
-    //     _descriptionController.text.isEmpty ||
-    //     _latitudeController.text.isEmpty ||
-    //     _longitudeController.text.isEmpty ||
-    //     _primaryImage == null) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text("Please fill all fields and select images")),
-    //   );
-    //   return;
-    // }
+  void _removeSecondaryImage(int index) {
+    setState(() {
+      _secondaryImages.removeAt(index);
+    });
+  }
+
+  List<String> _parseTags(String tagsText) {
+    return tagsText
+        .split(',')
+        .map((tag) => tag.trim())
+        .where((tag) => tag.isNotEmpty)
+        .toList();
+  }
+
+  bool _validateForm() {
+    if (_siteNameController.text.trim().isEmpty) {
+      _showError("Please enter heritage site name");
+      return false;
+    }
+    if (_descriptionController.text.trim().isEmpty) {
+      _showError("Please enter description");
+      return false;
+    }
+    if (_selectedCategory == null) {
+      _showError("Please select a category");
+      return false;
+    }
+    if (_selectedRegion == null) {
+      _showError("Please select a region");
+      return false;
+    }
+    if (_locationController.text.trim().isEmpty) {
+      _showError("Please enter location");
+      return false;
+    }
+    if (_primaryImage == null) {
+      _showError("Please select a primary image");
+      return false;
+    }
+    return true;
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  Future<void> _submitContribution(BuildContext context) async {
+    if (!_validateForm()) return;
 
     final provider = Provider.of<ContributionProvider>(context, listen: false);
-    provider.submitContribution(
-      siteName: _siteNameController.text,
-      description: _descriptionController.text,
-      latitude: _latitudeController.text,
-      longitude:_longitudeController.text,
-      primaryImage: _primaryImage!,
-      secondaryImages: _secondaryImages,
-    );
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      _showError("You must be logged in to submit.");
+      return;
+    }
 
-    // Clear fields after submission
+    try {
+      final locations = await locationFromAddress(_locationController.text.trim());
+      if (locations.isEmpty) {
+        _showError("Could not find coordinates for this location.");
+        return;
+      }
+      final loc = locations.first;
+      final latitude = loc.latitude.toString();
+      final longitude = loc.longitude.toString();
+
+      List<String> tags = _parseTags(_tagsController.text);
+
+      await provider.submitContribution(
+        userId: user.uid, // 👈 Pass userId
+        siteName: _siteNameController.text.trim(),
+        description: _descriptionController.text.trim(),
+        category: _selectedCategory!,
+        region: _selectedRegion!,
+        location: _locationController.text.trim(),
+        latitude: latitude,
+        longitude: longitude,
+        tags: tags,
+        primaryImage: _primaryImage!,
+        secondaryImages: _secondaryImages,
+      );
+
+      _clearForm();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Contribution submitted successfully! It will be reviewed before publishing."),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      _showError("Failed to get coordinates: $e");
+    }
+  }
+
+  void _clearForm() {
     _siteNameController.clear();
     _descriptionController.clear();
-    _latitudeController.clear();
-    _longitudeController.clear();
+    _locationController.clear();
+    _tagsController.clear();
     setState(() {
+      _selectedCategory = null;
+      _selectedRegion = null;
       _primaryImage = null;
       _secondaryImages = [];
     });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Contribution submitted successfully!")),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ContributionProvider>(context);
-    
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child:Scaffold(
-      appBar: AppBar(title: Text("Contribute Heritage Site")),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _siteNameController,
-              decoration: InputDecoration(labelText: "Heritage Site Name"),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: "Description"),
-              maxLines: 3,
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _latitudeController,
-              decoration: InputDecoration(labelText: "Latitude"),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _longitudeController,
-              decoration: InputDecoration(labelText: "Longitude"),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 20),
-
-            // Primary Image Picker
-            Text("Primary Image", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            _primaryImage != null
-                ? Image.file(_primaryImage!, height: 150)
-                : Text("No image selected"),
-            ElevatedButton(
-              onPressed: _pickPrimaryImage,
-              child: Text("Select Primary Image"),
-            ),
-            
-            SizedBox(height: 20),
-
-            // Secondary Images Picker
-            Text("Secondary Images", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            _secondaryImages.isNotEmpty
-                ? Wrap(
-                    spacing: 10,
-                    children: _secondaryImages.map((img) => Image.file(img, height: 80)).toList(),
-                  )
-                : Text("No images selected"),
-            ElevatedButton(
-              onPressed: _pickSecondaryImages,
-              child: Text("Select Secondary Images"),
-            ),
-
-            SizedBox(height: 30),
-
-            // Submit Button
-            provider.isLoading
-                ? Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: () => _submitContribution(context),
-                    child: Text("Submit Contribution"),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Contribute Heritage Site"),
+          backgroundColor:Color(0xFF795548),
+          foregroundColor: Colors.white,
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Add New Heritage Site",
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "Help preserve our cultural heritage by adding information about heritage sites.",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
-          ],
+                ),
+              ),
+              SizedBox(height: 20),
+
+              Text(
+                "Basic Information",
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+
+              TextField(
+                controller: _siteNameController,
+                decoration: InputDecoration(
+                  labelText: "Heritage Site Name *",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.location_city),
+                ),
+              ),
+              SizedBox(height: 15),
+
+              TextField(
+                controller: _descriptionController,
+                decoration: InputDecoration(
+                  labelText: "Description *",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.description),
+                  hintText: "Describe the heritage site, its history, and significance...",
+                ),
+                maxLines: 4,
+              ),
+              SizedBox(height: 15),
+
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                decoration: InputDecoration(
+                  labelText: "Category *",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.category),
+                ),
+                items: _categories
+                    .map((category) => DropdownMenuItem(
+                  value: category,
+                  child: Text(category),
+                ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCategory = value;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+
+              Text(
+                "Location Information",
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+
+              DropdownButtonFormField<String>(
+                value: _selectedRegion,
+                decoration: InputDecoration(
+                  labelText: "Region/Province *",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.map),
+                ),
+                items: _regions
+                    .map((region) => DropdownMenuItem(
+                  value: region,
+                  child: Text(region),
+                ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedRegion = value;
+                  });
+                },
+              ),
+              SizedBox(height: 15),
+
+              TextField(
+                controller: _locationController,
+                decoration: InputDecoration(
+                  labelText: 'Specific Location',
+                  prefixIcon: Icon(Icons.place),
+                  hintText: "e.g., Sundarijal, Kathmandu",
+                ),
+                onChanged: (value) {
+                  if (value.length > 2) { // to avoid too many calls
+                    getSuggestions(value);
+                  } else {
+                    setState(() {
+                      suggestions = [];
+                    });
+                  }
+                },
+              ),
+
+              SizedBox(height: 15),
+
+              TextField(
+                controller: _tagsController,
+                decoration: InputDecoration(
+                  labelText: "Tags (comma-separated)",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.tag),
+                  hintText: "nature, trekking, cultural, temple",
+                ),
+              ),
+              SizedBox(height: 20),
+
+              Text(
+                "Images",
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+
+              Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Primary Image *",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 10),
+                      _primaryImage != null
+                          ? Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              _primaryImage!,
+                              height: 200,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                        ],
+                      )
+                          : Container(
+                        height: 150,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.image, size: 50, color: Colors.grey),
+                            Text("No image selected"),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _pickPrimaryImage,
+                        icon: Icon(Icons.camera_alt),
+                        label: Text(_primaryImage != null
+                            ? "Change Primary Image"
+                            : "Select Primary Image"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 15),
+
+              Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Secondary Images (Optional)",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 10),
+                      _secondaryImages.isNotEmpty
+                          ? Column(
+                        children: [
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                            itemCount: _secondaryImages.length,
+                            itemBuilder: (context, index) {
+                              return Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius:
+                                    BorderRadius.circular(8),
+                                    child: Image.file(
+                                      _secondaryImages[index],
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: GestureDetector(
+                                      onTap: () =>
+                                          _removeSecondaryImage(index),
+                                      child: Container(
+                                        padding: EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          SizedBox(height: 10),
+                        ],
+                      )
+                          : Container(
+                        height: 100,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.collections,
+                                size: 40, color: Colors.grey),
+                            Text("No images selected"),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _pickSecondaryImages,
+                        icon: Icon(Icons.add_photo_alternate),
+                        label: Text("Add Secondary Images"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: provider.isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                  onPressed: () => _submitContribution(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF795548),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text(
+                    "Submit Contribution",
+                    style: TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
-      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _siteNameController.dispose();
+    _descriptionController.dispose();
+    _locationController.dispose();
+    _tagsController.dispose();
+    super.dispose();
   }
 }
