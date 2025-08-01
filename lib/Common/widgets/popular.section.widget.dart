@@ -1,14 +1,16 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:the_heritedge/Common/Screens/heritage_detail_screen.dart';
+
 import '../services/filter_heritage.service.dart';
 
 class PopularSectionWidget extends StatefulWidget {
   final Position userPosition;
 
-  const PopularSectionWidget({Key? key, required this.userPosition})
-      : super(key: key);
+  const PopularSectionWidget({Key? key, required this.userPosition}) : super(key: key);
 
   @override
   State<PopularSectionWidget> createState() => _PopularSectionWidgetState();
@@ -26,8 +28,7 @@ class _PopularSectionWidgetState extends State<PopularSectionWidget> {
   Future<void> fetchPopularSites() async {
     final firestore = FirebaseFirestore.instance;
 
-    QuerySnapshot siteSnapshot =
-    await firestore.collection('heritage_sites').get();
+    QuerySnapshot siteSnapshot = await firestore.collection('heritage_sites').get();
 
     List<Map<String, dynamic>> siteList = [];
 
@@ -35,6 +36,7 @@ class _PopularSectionWidgetState extends State<PopularSectionWidget> {
       String siteId = siteDoc.id;
       String name = siteDoc['name'];
       String imageUrl = siteDoc['imageUrl'];
+      String description =  siteDoc['description']??'';
 
       double latitude = double.parse(siteDoc['latitude'].toString());
       double longitude = double.parse(siteDoc['longitude'].toString());
@@ -67,8 +69,11 @@ class _PopularSectionWidgetState extends State<PopularSectionWidget> {
         'id': siteId,
         'name': name,
         'imageUrl': imageUrl,
+        'description': description,
         'averageRating': averageRating,
         'distance': distanceInKm,
+        'latitude': latitude,    // Added latitude
+        'longitude': longitude,  // Added longitude
         'userId': (siteDoc.data() as Map<String, dynamic>?)?.containsKey('userId') == true ? siteDoc['userId'] : null,
       });
     }
@@ -84,7 +89,7 @@ class _PopularSectionWidgetState extends State<PopularSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 260,
+      height: 280, // increase height a bit to fit description
       child: popularSites.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -92,7 +97,7 @@ class _PopularSectionWidgetState extends State<PopularSectionWidget> {
         itemCount: popularSites.length,
         itemBuilder: (context, index) {
           final site = popularSites[index];
-          return PopularSiteCard(site: site);
+          return PopularSiteCard(site: site, allSites: popularSites);
         },
       ),
     );
@@ -101,23 +106,24 @@ class _PopularSectionWidgetState extends State<PopularSectionWidget> {
 
 class PopularSiteCard extends StatelessWidget {
   final Map<String, dynamic> site;
+  final List<Map<String, dynamic>> allSites;
 
-  const PopularSiteCard({Key? key, required this.site}) : super(key: key);
+  PopularSiteCard({Key? key, required this.site, required this.allSites}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigate and pass full site map including userId
+        // Navigate and pass full site map including userId, lat, long, description
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => HeritageDetailScreen(site: site),
+            builder: (context) => HeritageDetailScreen(site: site, allSites: allSites),
           ),
         );
       },
       child: Container(
-        width: 180,
+        width: 200,
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -134,9 +140,7 @@ class PopularSiteCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: Image.network(
                 site['imageUrl'],
                 height: 140,
@@ -148,14 +152,22 @@ class PopularSiteCard extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 site['name'],
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            // Description text, max 2 lines, smaller font
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                site['description'] ?? '',
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 4),
             site['averageRating'] > 0
                 ? Row(
               children: [
@@ -171,9 +183,8 @@ class PopularSiteCard extends StatelessWidget {
               'No ratings yet',
               style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
             ),
-
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
               child: Row(
                 children: [
                   const Icon(Icons.location_on, color: Colors.red, size: 18),
@@ -194,3 +205,4 @@ class PopularSiteCard extends StatelessWidget {
     );
   }
 }
+

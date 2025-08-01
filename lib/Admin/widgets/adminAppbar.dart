@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/connectors/v1.dart';
-import 'package:the_heritedge/Common/widgets/search._bar.widget.dart';
 
 import '../../User/login_sign_up/repository/auth_service.dart';
 class AdminCustomAppBar extends StatelessWidget implements PreferredSizeWidget {

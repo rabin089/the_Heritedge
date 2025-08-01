@@ -97,7 +97,7 @@ class _HeritageListPageState extends State<HeritageListPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HeritageDetailScreen(site: site),
+                          builder: (context) => HeritageDetailScreen(site: site, allSites: sites),
                         ),
                       );
                     },

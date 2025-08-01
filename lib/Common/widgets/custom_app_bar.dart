@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/connectors/v1.dart';
-import 'package:the_heritedge/Common/widgets/search._bar.widget.dart';
 
 import '../../User/login_sign_up/repository/auth_service.dart';
 import '../providers/theme_provider.dart';
+import 'heritage_location_search_delegate.dart';
+import 'heritage_name_search_delegate.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final AuthService _authService = AuthService();
@@ -47,13 +48,45 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: Icon(Icons.search,),
           color: Colors.white,
-          onPressed: () async {
-            final userPosition = await _userLocationFuture;
-            showSearch(
-              context: context,
-              delegate: HeritageSearchDelegate(),
-            );
-          },
+            onPressed: () async {
+              final choice = await showDialog<String>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('Choose Search Type'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: Icon(Icons.location_on),
+                          title: Text('Search by Location'),
+                          onTap: () => Navigator.pop(context, 'location'),
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.text_fields),
+                          title: Text('Search by Name'),
+                          onTap: () => Navigator.pop(context, 'name'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+
+              if (choice == 'location') {
+                final userPosition = await _userLocationFuture;
+                showSearch(
+                  context: context,
+                  delegate: HeritageLocationSearchDelegate(userLocation: userPosition),
+                );
+              } else if (choice == 'name') {
+                showSearch(
+                  context: context,
+                  delegate: HeritageNameSearchDelegate(),
+                );
+              }
+            }
+
         ),
         IconButton(
           icon: Icon(Icons.menu),

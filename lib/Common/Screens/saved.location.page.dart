@@ -9,7 +9,7 @@ class BookmarkListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("My Bookmarks"),
+        title: Text("My Edge Collection "),
         backgroundColor: Colors.brown,
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
@@ -46,7 +46,7 @@ class BookmarkListScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => HeritageDetailScreen(site: site),
+                        builder: (context) => HeritageDetailScreen(site: site, allSites: bookmarks),
                       ),
                     );
                   },

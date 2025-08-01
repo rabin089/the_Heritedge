@@ -19,134 +19,136 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: Column(
-        children: [
-          // Header
-          Container(
-            height: 88,
-            width: double.infinity,
-            color: Colors.brown,
-            padding: EdgeInsets.only(top: 40, right: 16),
-            child: Row(
-              children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    "HeritEdge",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: Drawer(
+        child: Column(
+          children: [
+            // Header
+            Container(
+              height: 88,
+              width: double.infinity,
+              color: Colors.brown,
+              padding: EdgeInsets.only(top: 40, right: 16),
+              child: Row(
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "HeritEdge",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                Spacer(),
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: Icon(Icons.close, color: Colors.white),
-                    onPressed: () {
-                      Navigator.of(context).pop();
+                  Spacer(),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      icon: Icon(Icons.close, color: Colors.white),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+      
+            // Menu items
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.person),
+                    title: Text("Profile"),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>UserProfileScreen()));
                     },
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // Menu items
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                ListTile(
-                  leading: Icon(Icons.person),
-                  title: Text("Profile"),
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>UserProfileScreen()));
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.bookmark),
-                  title: Text("Saved Location"),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => BookmarkListScreen()),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.edit),
-                  title: Text("Contributions"),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ContributionScreen()),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.settings),
-                  title: Text("Settings"),
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ChangePasswordScreen()));
-                  },
-                ),
-                Consumer<AuthLoginProvider>(
-                  builder: (context, authProvider, _) {
-                    if (authProvider.role == 'admin') {
-                      return ListTile(
-                        leading: Icon(Icons.dashboard),
-                        title: Text("Admin Dashboard"),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AdminDashboardScreen(),
-                            ),
-                          );
-                        },
+                  ListTile(
+                    leading: Icon(Icons.bookmark),
+                    title: Text("My Edge Collection"),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => BookmarkListScreen()),
                       );
-                    } else {
-                      return SizedBox.shrink();
-                    }
-                  },
-                ),
-
-                // ListTile(
-                //   leading: Icon(Icons.logout, color: Colors.red),
-                //   title: Text("Demo Page", style: TextStyle(color: Colors.red)),
-                //   onTap: ()  {
-                //
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(builder: (context) => DemoHomeScreen()),
-                //     );
-                //   },
-                // ),
-              ],
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.edit),
+                    title: Text("Contributions"),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ContributionScreen()),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.settings),
+                    title: Text("Settings"),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ChangePasswordScreen()));
+                    },
+                  ),
+                  Consumer<AuthLoginProvider>(
+                    builder: (context, authProvider, _) {
+                      if (authProvider.role == 'admin') {
+                        return ListTile(
+                          leading: Icon(Icons.dashboard),
+                          title: Text("Admin Dashboard"),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AdminDashboardScreen(),
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    },
+                  ),
+      
+                  // ListTile(
+                  //   leading: Icon(Icons.logout, color: Colors.red),
+                  //   title: Text("Demo Page", style: TextStyle(color: Colors.red)),
+                  //   onTap: ()  {
+                  //
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(builder: (context) => DemoHomeScreen()),
+                  //     );
+                  //   },
+                  // ),
+                ],
+              ),
             ),
-          ),
-
-          // Divider & Logout button
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.logout, color: Colors.red),
-            title: Text("Logout", style: TextStyle(color: Colors.red)),
-            onTap: () async {
-              await FirebaseAuth.instance.signOut();
-              print("Logged out user: $user");
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-              );
-            },
-          ),
-        ],
+      
+            // Divider & Logout button
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.logout, color: Colors.red),
+              title: Text("Logout", style: TextStyle(color: Colors.red)),
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                print("Logged out user: $user");
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

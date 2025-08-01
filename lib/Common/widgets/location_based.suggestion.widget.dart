@@ -114,7 +114,7 @@ class _SuggestedHeritageWidgetState extends State<SuggestedHeritageWidget> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => HeritageDetailScreen(site: site),
+                        builder: (context) => HeritageDetailScreen(site: site, allSites: widget.sites),
                       ),
                     );
                   },

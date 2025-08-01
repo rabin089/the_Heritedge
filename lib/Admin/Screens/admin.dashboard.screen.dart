@@ -423,8 +423,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     String selectedRole = currentRole;
 
     List<String> allowedRoles = currentUserRole == 'superadmin'
-        ? ['superadmin', 'admin', 'user']
-        : ['admin', 'user'];
+        ? [ 'admin', 'user']
+        : [ 'user'];
 
     showDialog(
       context: context,

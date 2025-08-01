@@ -23,23 +23,28 @@ class HeritageService {
         final data = doc.data() as Map<String, dynamic>;
         debugPrint("Processing document ID: ${doc.id}");
 
-        // Standardize image URL field (handle both 'imageUrl' and 'imageurl')
+        // Primary image URL
         String? imageUrl = _getValidImageUrl(data);
 
-        // Clean and validate all data before returning
+        // Secondary images list (safe parsing)
+        List<String> secondaryImages = [];
+        if (data.containsKey('secondaryImages') && data['secondaryImages'] is List) {
+          secondaryImages = List<String>.from(data['secondaryImages'].whereType<String>());
+        }
+
         return {
           "id": doc.id,
           "name": data["name"]?.toString().trim() ?? "Unnamed Site",
           "location": data["location"]?.toString().trim() ?? "Location not specified",
           "description": data["description"]?.toString().trim() ?? "No description available",
-          "imageUrl": imageUrl, // This will be either valid URL or empty string
+          "imageUrl": imageUrl,
+          "secondaryImages": secondaryImages,  // ✅ Added this line
           "latitude": _parseDouble(data["latitude"]),
           "longitude": _parseDouble(data["longitude"]),
           "region": data["region"]?.toString().trim(),
           "category": data["category"]?.toString().trim(),
           "timestamp": data["timestamp"],
           "userId": data["userId"]?.toString() ?? "",
-          // Add other fields as needed
         };
       }).toList();
 
@@ -49,6 +54,7 @@ class HeritageService {
       return [];
     }
   }
+
 
   // Helper method to get valid image URL
   String? _getValidImageUrl(Map<String, dynamic> data) {

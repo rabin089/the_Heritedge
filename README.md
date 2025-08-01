@@ -1,16 +1,34 @@
-# the_heritedge
+# 🛕 HeritEdge
 
-A new Flutter project.
+**HeritEdge** is a community-driven, mobile-based digital archive app for discovering, 
+contributing, and preserving Nepal’s rich cultural and natural heritage. Built with Flutter,
+HeritEdge empowers users to explore heritage sites, view them on an interactive map,
+and contribute new discoveries to a growing public archive.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 📱 Features
 
-A few resources to get you started if this is your first Flutter project:
+- 🛕 Discover famous and lesser-known heritage sites across Nepal
+- 🗺️ Interactive map integration with Google Maps
+- 🔍 Search sites by name, category, or location
+- 📸 Contribute your own heritage site discoveries via in-app form or online form
+- 📍 Get directions to any site via Google Maps navigation
+- 💾 Save your favorite places
+- 🌏 Community-driven heritage preservation initiative
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 Tech Stack
+
+- **Flutter** (Dart)
+- **Firebase Firestore** (Cloud NoSQL database)
+- **ImgBB** (Image hosting)
+- **Google Maps API**
+- **State Management:**  Provider (based on modules)
+- **Android SDK**
+
+
+---
+
+

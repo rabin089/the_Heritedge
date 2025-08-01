@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps show LatLng;
 import 'package:image_picker/image_picker.dart';
+import 'package:the_heritedge/Common/widgets/custom_location.picker.dart';
 import 'dart:io';
 
 import '../../User/ui/services/imgbb.services.dart';
@@ -124,6 +126,21 @@ class _EditHeritageSitePageState extends State<EditHeritageSitePage> {
           }
         }
       }
+
+      void _openLocationDialog() async {
+    final result = await showDialog(
+      context: context,
+      builder: (_) => const LocationPickerDialog(),
+    );
+
+    if (result != null) {
+      final selectedLatLng = result['latLng'] as gmaps.LatLng?;
+
+      final String? address = result['address'];
+
+      locationController.text = address ?? '';
+    }
+  }
 
       // Update Firestore document
       await FirebaseFirestore.instance

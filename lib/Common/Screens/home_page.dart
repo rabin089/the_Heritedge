@@ -13,7 +13,6 @@ import '../utility/distance.calculator.utils.dart';
 import '../widgets/filter.section.widget.dart';
 import '../widgets/location_based.suggestion.widget.dart';
 import '../widgets/popular.section.widget.dart';
-import '../widgets/search._bar.widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -92,88 +91,90 @@ class _HomeScreenState extends State<HomeScreen> {
         userLocationFuture: LocationService().getCurrentPosition(),
       ),
       drawer: AppDrawer(),
-      body: FutureBuilder<List<dynamic>>(
-        future: _initFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text("Could not load suggested sites."));
-          }
-
-          final sites = snapshot.data![0] as List<Map<String, dynamic>>;
-          final userPosition = snapshot.data![1] as geo.Position;
-
-          // Assign values only once
-          if (_allSites.isEmpty) {
-            _allSites = sites;
-            _userPosition = userPosition;
-            _filteredSites = sites;
-          }
-
-          return ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            children: [
-              SuggestedHeritageWidget(
-                sites: _allSites,
-                userPosition: userPosition,
-              ),
-              sboxH10,
-              SuggestionHeaderWidget(title: "Suggested For You"),
-
-              FilterSectionWidget(
-                onApply: ({
-                  required String region,
-                  required String category,
-                  required List<String> tags,
-                }) {
-                  final results = _filterSitesWithAll(
-                    sites: _allSites,
-                    query: _controller.text,
-                    userPos: _userPosition,
-                    region: region == "All" ? "" : region,
-                    category: category == "All" ? "" : category,
-                    tags: tags,
-                  );
-
-                  setState(() {
-                    _filteredSites = results;
-                  });
-                },
-              ),
-
-              // ✅ Show filtered sites
-              if (_filteredSites.isNotEmpty) ...[
-                SizedBox(
-                  height: 210, // Adjust height based on your card's content
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _filteredSites.length,
-                    itemBuilder: (context, index) {
-                      final site = _filteredSites[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 10.0),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.5, // Half of scaffold width
-                          child: HeritageSiteCard(site: site),
-                        ),
-                      );
-                    },
-                  ),
+      body: SafeArea(
+        child: FutureBuilder<List<dynamic>>(
+          future: _initFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+        
+            if (!snapshot.hasData || snapshot.data == null) {
+              return const Center(child: Text("Could not load suggested sites."));
+            }
+        
+            final sites = snapshot.data![0] as List<Map<String, dynamic>>;
+            final userPosition = snapshot.data![1] as geo.Position;
+        
+            // Assign values only once
+            if (_allSites.isEmpty) {
+              _allSites = sites;
+              _userPosition = userPosition;
+              _filteredSites = sites;
+            }
+        
+            return ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              children: [
+                SuggestedHeritageWidget(
+                  sites: _allSites,
+                  userPosition: userPosition,
                 ),
-              ] else ...[
-                const SizedBox(height: 16),
-                SuggestionHeaderWidget(title: "No matching results"),
+                sboxH10,
+                SuggestionHeaderWidget(title: "Suggested For You"),
+        
+                FilterSectionWidget(
+                  onApply: ({
+                    required String region,
+                    required String category,
+                    required List<String> tags,
+                  }) {
+                    final results = _filterSitesWithAll(
+                      sites: _allSites,
+                      query: _controller.text,
+                      userPos: _userPosition,
+                      region: region == "All" ? "" : region,
+                      category: category == "All" ? "" : category,
+                      tags: tags,
+                    );
+        
+                    setState(() {
+                      _filteredSites = results;
+                    });
+                  },
+                ),
+        
+                // ✅ Show filtered sites
+                if (_filteredSites.isNotEmpty) ...[
+                  SizedBox(
+                    height: 210, // Adjust height based on your card's content
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _filteredSites.length,
+                      itemBuilder: (context, index) {
+                        final site = _filteredSites[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 10.0),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.5, // Half of scaffold width
+                            child: HeritageSiteCard(site: site),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 16),
+                  SuggestionHeaderWidget(title: "No matching results"),
+                ],
+        
+                const SizedBox(height: 20),
+                SuggestionHeaderWidget(title: "Most popular Heritage"),
+                PopularSectionWidget(userPosition: _userPosition!),
               ],
-
-              const SizedBox(height: 20),
-              SuggestionHeaderWidget(title: "Most popular Heritage"),
-              PopularSectionWidget(userPosition: _userPosition!),
-            ],
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
