@@ -1,16 +1,22 @@
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:the_heritedge/Screens/home_page.dart';
-import 'package:the_heritedge/Screens/signup_page.dart';
-import 'package:the_heritedge/Services/auth_service.dart';
-
+import 'package:provider/provider.dart';
+import 'package:the_heritedge/User/login_sign_up/provider/auth.provider.dart';
+import 'package:the_heritedge/User/login_sign_up/screens/forget.password.dart';
+import 'package:the_heritedge/Common/Screens/home_page.dart';
+import 'package:the_heritedge/User/login_sign_up/screens/signup_page.dart';
+import 'package:the_heritedge/User/login_sign_up/repository/auth_service.dart';
+import 'package:the_heritedge/Common/sizedBox/sized.box.widget.dart';
 
 
 
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
 
 
   @override
@@ -23,15 +29,39 @@ class LoginScreenState extends State<LoginScreen> {
   final AuthService authService= AuthService();
   final keyForm = GlobalKey<FormState>();
 
-  void login()async{
-    String email= emailControl.text.trim();
-    String password= passwordControl.text.trim();
-    var user= await authService.signIn(email, password);
-    if(user!=null){
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
-    }
-    else{
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Login Failed! Check credentails")));
+  void login() async {
+    String email = emailControl.text.trim();
+    String password = passwordControl.text.trim();
+
+    var user = await authService.signIn(email, password);
+    if (user != null) {
+      // 🔥 Fetch role from Firestore
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('roles_for_users')
+          .doc(user.uid)
+          .get();
+      print("user uid: ${user.uid}");
+      print("userDoc exists: ${userDoc.exists}");
+      if (userDoc.exists) {
+        final role = userDoc['role'];
+
+        // ✅ Set role in AuthProvider
+        Provider.of<AuthLoginProvider>(context, listen: false).setRole(role);
+
+        // ⛳ Navigate to HomeScreen (can handle role-based redirection there)
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("User data not found.")),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login Failed! Check credentials")),
+      );
     }
   }
 
@@ -47,7 +77,7 @@ class LoginScreenState extends State<LoginScreen> {
             fit: BoxFit.cover,
           ),
           BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 25),
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           ),
           Center(
             child: Container(
@@ -108,8 +138,21 @@ class LoginScreenState extends State<LoginScreen> {
                                 border: OutlineInputBorder(),
                               ),
                             ),
-                            SizedBox(height: 20,),
-                            ElevatedButton(onPressed: login, child: Text("login",style: TextStyle(color: Colors.black),)),
+                            sboxH20,
+                            ElevatedButton(
+                                onPressed: login,
+                                child: Text("login",
+                                  style: TextStyle(color: Colors.black),
+                                )),
+                            sboxH20,
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                    context, MaterialPageRoute(
+                                    builder: (context) => ForgotPasswordScreen()));
+                              },
+                              child: Text("Forgot Password?", style: TextStyle(color: Colors.black)),
+                            ),
                             TextButton(onPressed: () {
                               Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
                             },
